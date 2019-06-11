@@ -1,20 +1,17 @@
-FROM phusion/baseimage:0.9.19
+FROM python:3.7-alpine
 
-MAINTAINER {{ cookiecutter.author_name }} "{{ cookiecutter.email }}"
+MAINTAINER jiangtao "jiangtao.work@gmail.com"
 
-USER root
+EXPOSE 8000
 
-ENV PYTHON_VERSION 2.7
-
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y --no-install-recommends build-essential openssh-client git git-core python-pip procps net-tools wget unzip python${PYTHON_VERSION} python${PYTHON_VERSION}-dev python-distribute \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
+    # && apk update \
+    && apk add --update --no-cache g++ gcc libxslt-dev
 
 WORKDIR /app
 ADD . /app/
 
-RUN pip install wheel \
-    && pip install -r requirements.txt
-RUN chown -R www-data: /app
+RUN pip install --no-cache-dir --upgrade pip -i https://mirrors.aliyun.com/pypi/simple \
+    && pip install --no-cache-dir -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple
+
+ENTRYPOINT ["python", "run.py"]
